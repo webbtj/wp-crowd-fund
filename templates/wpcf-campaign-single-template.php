@@ -1,0 +1,16 @@
+<?php
+//pre($post);
+//pre($content);
+wpcf_perk_error($perk_error);
+br();
+wpcf_goal();
+br();
+wpcf_backers();
+br();
+wpcf_end_date();
+br();
+wpcf_days_left();
+br();
+wpcf_perks();
+br();
+wpcf_contribute_form();
