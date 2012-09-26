@@ -2,7 +2,7 @@
 
 add_action('init', array('WPCrowdFund_Admin', 'register_post_types'));
 add_action('add_meta_boxes', array('WPCrowdFund_Admin', 'add_meta_boxes'));
-add_action('save_post', array('WPCrowdFund_Admin', 'save_post'));
+add_action('save_post', array('WPCrowdFund_Admin', 'save_post'), 40);
 add_action('admin_enqueue_scripts', array('WPCrowdFund_Admin', 'admin_enqueue_scripts'));
 
 class WPCrowdFund_Admin{
@@ -79,6 +79,7 @@ class WPCrowdFund_Admin{
 	}
 
 	public static function mb_campaign_givebacks(){
+		WPCrowdFund_Installer::cron();
 		wp_nonce_field(basename(__FILE__), 'WPCrowdFund_Admin_Givebacks');
 		global $post;
 		$saved_givebacks = get_children(array(
@@ -114,15 +115,16 @@ class WPCrowdFund_Admin{
 			div(array(
 				'id' => 'wp-crowd-fund-giveback-region-' . $giveback['index'],
 				'class' =>  $class));
-			WPCrowdFund_AdminFields::giveback_title($giveback['title'], $giveback['index']);
+			WPCrowdFund_AdminFields::giveback_title($giveback['title'], $giveback['index'], $giveback['sold']);
 			br();
-			WPCrowdFund_AdminFields::giveback_cost($giveback['cost'], $giveback['index']);
+			WPCrowdFund_AdminFields::giveback_cost($giveback['cost'], $giveback['index'], $giveback['sold']);
 			br();
-			WPCrowdFund_AdminFields::giveback_limit($giveback['limit'], $giveback['index']);
+			WPCrowdFund_AdminFields::giveback_limit($giveback['limit'], $giveback['index'], $giveback['sold']);
 			br();
-			WPCrowdFund_AdminFields::giveback_description($giveback['description'], $giveback['index']);
+			WPCrowdFund_AdminFields::giveback_description($giveback['description'], $giveback['index'], $giveback['sold']);
+			$of_sold = $giveback['limit'] ? $giveback['limit'] : __('Unlimited', 'wp crowd-fund');
 			if($giveback['sold']){
-				$sold = sprintf(__('%d of %d sold', 'wp crowd fund'), $giveback['sold'], $giveback['limit']);
+				$sold = sprintf(__('%d of %s sold', 'wp crowd fund'), $giveback['sold'], $of_sold);
 				br();
 				echo $sold;
 			}

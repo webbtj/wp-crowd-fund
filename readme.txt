@@ -6,12 +6,15 @@ Tested up to: 3.4.2
 Stable tag: trunk
 
 == TODO: ==
-- Admin JS
+- Admin JS -- check
 - Admin CSS
-- Front End JS
+- Front End JS -- check
 - Front End CSS
 - PayPal Integration
-- Extra Backer Fields (configurable)
+- Extra Backer Fields (configurable) -- check
+- API Comments -- check
+- Cron to delete old holds -- think it's done, cron registers correctly, sql query works, just need to confirm cron actually runs
+- Generate report of sold perks/backer info (can wait until after launch)
 
 == Description ==
 
@@ -49,6 +52,17 @@ Administer Global Campaign Limitations:
 
 == Changelog ==
 
-= 1.0 =
+= 0.0.1 =
+Fixed some stub/missing api/template functions
+Commented/Documented api/template functions
+Custom Fields (configurable with template)
+Put items on hold once they are requested
+Finished some missing logic Perk Buy/Cancel work-flows
+Disable admin input fields for perks with at least one unit sold
+Frontend JS nice-ness, see js/wp-crowd-fund.js for details.
+Moved some stuff that wasn't really part of the templating API into a "core.php" file
+
+= 0.0.0 =
+Initial github push
 
 First public release.

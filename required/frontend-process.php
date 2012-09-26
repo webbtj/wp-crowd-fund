@@ -3,10 +3,14 @@
 class WPCrowdFund_FrontEnd_Process{
 
 	public static function user_contribution(){
-		if($_POST['confirm-contribution']=='confirm-contribution')
-			return self::process_contribution();
 		if(empty($_POST))
 			return false;
+
+		if(isset($_POST['confirm-contribution']))
+			return self::process_contribution();
+
+		if(isset($_POST['cancel-contribution']))
+			self::cancel_contribution();
 
 		global $post;
 		$post_id = $post->ID;
@@ -32,8 +36,9 @@ class WPCrowdFund_FrontEnd_Process{
 		$perk_cost = $perk_custom['cost'][0];
 		$perk_limit = $perk_custom['limit'][0];
 		$perk_sold = $perk_custom['sold'][0];
+		$perk_hold = count($perk_custom['hold']);
 
-		if($perk_limit && $perk_solt>=$perk_limit)
+		if($perk_limit && $perk_sold+$perk_hold>=$perk_limit)
 			return 'perk-soldout';
 
 		$amount = WPCrowdFund_AdminValidator::settings_target($_POST['wpcf-contribute-amount']);
@@ -53,6 +58,15 @@ class WPCrowdFund_FrontEnd_Process{
 		$backer = wp_insert_post($backer);
 		update_post_meta($backer, 'email', $email);
 		update_post_meta($backer, 'amount', $amount);
+
+		include(wpcf_template_include(dirname(dirname(__FILE__)).'/templates/wpcf-campaign-contributor-fields.php'));
+		if(is_array($wpcf_contributor_fields) && !empty($wpcf_contributor_fields)){
+			foreach($wpcf_contributor_fields as $field => $label){
+				if(isset($_POST['wpcf-contribute-' . $field]))
+					update_post_meta($backer, $field, $_POST['wpcf-contribute-' . $field]);
+			}
+		}
+
 
 		$_SESSION['backer'] = $backer;
 
@@ -81,6 +95,10 @@ class WPCrowdFund_FrontEnd_Process{
 		$perk_cost = $perk_custom['cost'][0];
 		$perk_limit = $perk_custom['limit'][0];
 		$perk_sold = $perk_custom['sold'][0];
+		$perk_hold = count($perk_custom['hold']);
+		$perk_sold += $perk_hold;
+
+		add_post_meta($perk->ID, 'hold', strtotime('now'));
 		$perk_title = $perk->post_title;
 		$perk_description = $perk->post_content;
 		$name = $_POST['wpcf-contribute-name'] ? $_POST['wpcf-contribute-name'] : __('Anonymous', 'wp crowd fund');
@@ -98,6 +116,25 @@ class WPCrowdFund_FrontEnd_Process{
 		return true;
 	}
 
+	public static function cancel_contribution(){
+		//get the backer
+		$backer = wp_get_single_post($_SESSION['backer']);
+		//delete backer meta
+		//get perk
+		$perk = wp_get_single_post($backer->post_parent);
+		//get perk meta
+		$perk_custom = get_post_custom($perk->ID);
+		//remove last hold
+		$hold = $perk_custom['hold'];
+		sort($hold);
+		$last = array_pop($hold);
+		delete_post_meta($perk->ID, 'hold', $last);
+		//delete backer
+		wp_delete_post($_SESSION['backer'], true);
+		//remove backer form session
+		unset($_SESSION['backer']);
+	}
+
 	public static function complete_transaction(){
 		//this would get called from paypal
 		$backer['ID'] = $_SESSION['backer'];
@@ -111,6 +148,12 @@ class WPCrowdFund_FrontEnd_Process{
 		$sold = $perk_custom['sold'] ? $perk_custom['sold'][0] : 0;
 		$sold++;
 		update_post_meta($perk->ID, 'sold', $sold);
+
+		$hold = $perk_custom['hold'];
+		sort($hold);
+		$last = array_pop($hold);
+		delete_post_meta($perk->ID, 'hold', $last);
+
 		$perk_custom = get_post_custom($perk->ID);
 
 		global $post;
@@ -119,6 +162,7 @@ class WPCrowdFund_FrontEnd_Process{
 		$perk_title = $perk->post_title;
 		$perk_description = $perk->post_content;
 		$perk_sold = $perk_custom['sold'][0];
+		$perk_hold = count($perk_custom['hold']);
 		$perk_limit = $perk_custom['limit'][0];
 		$perk_cost = $perk_custom['cost'][0];
 		$backer_title = $backer->post_title;

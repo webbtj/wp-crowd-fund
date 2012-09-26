@@ -5,6 +5,8 @@ wpcf_perk_error($perk_error);
 br();
 wpcf_goal();
 br();
+wpcf_contributed();
+br();
 wpcf_backers();
 br();
 wpcf_end_date();

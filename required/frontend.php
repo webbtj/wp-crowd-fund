@@ -1,5 +1,6 @@
 <?php
 add_filter('the_content', array('WPCrowdFund_FrontEnd', 'the_content'));
+add_action('wp_enqueue_scripts', array('WPCrowdFund_FrontEnd', 'enqueue_scripts'));
 
 class WPCrowdFund_FrontEnd{
 
@@ -24,6 +25,10 @@ class WPCrowdFund_FrontEnd{
 				include(wpcf_template_include(dirname(dirname(__FILE__)).'/templates/wpcf-campaign-single-template.php'));
 		}
 		return $content;
+	}
+
+	function enqueue_scripts(){
+		wp_enqueue_script('wpcf-front-end', plugins_url('js/wp-crowd-fund.js', dirname(__FILE__)), array('jquery'));
 	}
 }
 

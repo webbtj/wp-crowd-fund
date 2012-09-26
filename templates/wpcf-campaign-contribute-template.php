@@ -9,5 +9,24 @@
 	<?php wpcf_contribute_email_input(); ?>
 	<label for="<?php wpcf_contribute_comments_input(true,true); ?>"><?php echo __('Comments', 'wp crowd fund'); ?></label>
 	<?php wpcf_contribute_comments_input(); ?>
+
+	<?php wpcf_contributor_label('address1'); ?>
+	<?php wpcf_contributor_text_field('address1'); ?>
+
+	<?php wpcf_contributor_label('address2'); ?>
+	<?php wpcf_contributor_text_field('address2'); ?>
+
+	<?php wpcf_contributor_label('city'); ?>
+	<?php wpcf_contributor_text_field('city'); ?>
+
+	<?php wpcf_contributor_label('province'); ?>
+	<?php wpcf_contributor_text_field('province'); ?>
+
+	<?php wpcf_contributor_label('country'); ?>
+	<?php wpcf_contributor_text_field('country'); ?>
+
+	<?php wpcf_contributor_label('postal_code'); ?>
+	<?php wpcf_contributor_text_field('postal_code'); ?>
+
 	<input type="submit" value="<?php echo __('Contribute Now', 'wp crowd fund'); ?>" />
 </form>

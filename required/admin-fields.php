@@ -28,24 +28,24 @@ class WPCrowdFund_AdminFields{
 		<label for="wp-crowd-fund-settings-type-flexible"><?php echo __('Flexible Funding', 'wp crowd fund'); ?></label>
 	<?php }
 
-	public static function giveback_title($value='', $index=0){ ?>
+	public static function giveback_title($value='', $index=0, $sold=false){ ?>
 		<label for="wp-crowd-fund-giveback-title-<?php echo $index; ?>"><?php echo __('Title', 'wp crowd fund'); ?></label>
-		<input type="text" name="wp-crowd-fund-giveback[<?php echo $index; ?>][title]" id="wp-crowd-fund-giveback-title-<?php echo $index; ?>" value="<?php echo $value; ?>" />
+		<input <?php disabled((bool)$sold, true); ?> type="text" name="wp-crowd-fund-giveback[<?php echo $index; ?>][title]" id="wp-crowd-fund-giveback-title-<?php echo $index; ?>" value="<?php echo $value; ?>" />
 	<?php }
 
-	public static function giveback_cost($value='', $index=0){ ?>
+	public static function giveback_cost($value='', $index=0, $sold=false){ ?>
 		<label for="wp-crowd-fund-giveback-cost-<?php echo $index; ?>"><?php echo __('Minimum Contribution', 'wp crowd fund'); ?></label>
-		<input type="text" name="wp-crowd-fund-giveback[<?php echo $index; ?>][cost]" id="wp-crowd-fund-giveback-cost-<?php echo $index; ?>" value="<?php echo $value; ?>" />
+		<input <?php disabled((bool)$sold, true); ?> type="text" name="wp-crowd-fund-giveback[<?php echo $index; ?>][cost]" id="wp-crowd-fund-giveback-cost-<?php echo $index; ?>" value="<?php echo $value; ?>" />
 	<?php }
 
-	public static function giveback_limit($value='', $index=0){ ?>
+	public static function giveback_limit($value='', $index=0, $sold=false){ ?>
 		<label for="wp-crowd-fund-giveback-limit-<?php echo $index; ?>"><?php echo __('Limited Quantity', 'wp crowd fund'); ?></label>
-		<input type="text" name="wp-crowd-fund-giveback[<?php echo $index; ?>][limit]" id="wp-crowd-fund-giveback-limit-<?php echo $index; ?>" value="<?php echo $value; ?>" />
+		<input <?php disabled((bool)$sold, true); ?> type="text" name="wp-crowd-fund-giveback[<?php echo $index; ?>][limit]" id="wp-crowd-fund-giveback-limit-<?php echo $index; ?>" value="<?php echo $value; ?>" />
 	<?php }
 
-	public static function giveback_description($value='', $index=0){ ?>
+	public static function giveback_description($value='', $index=0, $sold=false){ ?>
 		<label for="wp-crowd-fund-giveback-description-<?php echo $index; ?>"><?php echo __('Description', 'wp crowd fund'); ?></label>
-		<textarea name="wp-crowd-fund-giveback[<?php echo $index; ?>][description]" id="wp-crowd-fund-giveback-description-<?php echo $index; ?>" class="widefat"><?php echo $value; ?></textarea>
+		<textarea <?php disabled((bool)$sold, true); ?> name="wp-crowd-fund-giveback[<?php echo $index; ?>][description]" id="wp-crowd-fund-giveback-description-<?php echo $index; ?>" class="widefat"><?php echo $value; ?></textarea>
 	<?php }
 
 	public static function giveback_add(){ ?>
