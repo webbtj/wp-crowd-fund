@@ -1,5 +1,4 @@
 <div id="perk-confirmation">
-	<?php echo time() - (2*60*60); ?>
 	<div id="perk-title"><?php echo $perk_title; ?></div>
 	<div id="perk-cost"><?php echo $perk_cost; ?></div>
 	<div id="perk-description"><?php echo $perk_description; ?></div>

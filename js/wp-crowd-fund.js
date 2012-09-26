@@ -29,6 +29,14 @@ jQuery(function($){
 		//on key up call the disable perks function
 		}).keyup(function(){disable_perks_on_price()});
 
+		$('#wpcf-contribute-anonymous').click(function(){
+			if($(this).is(':checked')){
+				$('#wpcf-contribute-name, #wpcf-contribute-email, .wpcf-not-required-anonymous').prop('disabled', true);
+			}else{
+				$('#wpcf-contribute-name, #wpcf-contribute-email, .wpcf-not-required-anonymous').prop('disabled', false);
+			}
+		});
+
 		//disable all perks who "min-contribution" data attribute is below the value in the amount field
 		//if a perk that was previously selected is below the value in the amount field, it will be un-selected
 		function disable_perks_on_price(){

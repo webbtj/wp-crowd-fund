@@ -17,12 +17,20 @@ class WPCrowdFund_FrontEnd_Process{
 
 		$required_fields = array(	'wpcf-contribute-amount',
 									'wpcf-contribute-perk',
-									'wpcf-contribute-name',
-									'wpcf-contribute-email',
+									//'wpcf-contribute-name',
+									//'wpcf-contribute-email',
 									'wpcf-contribute-comments');
 		foreach($required_fields as $required_field){
 			if(!isset($_POST[$required_field]))
 				return false;
+		}
+
+		if(!$_POST['wpcf-contribute-anonymous'] && (!$_POST['wpcf-contribute-name'] || !$_POST['wpcf-contribute-email'])){
+			return 'name-email-missing';
+		}
+
+		if($_POST['wpcf-contribute-email'] && !is_email($_POST['wpcf-contribute-email'])){
+			return 'invalid-email';
 		}
 
 		if(!is_numeric($_POST['wpcf-contribute-perk']))
@@ -31,6 +39,22 @@ class WPCrowdFund_FrontEnd_Process{
 		$perk = wp_get_single_post($_POST['wpcf-contribute-perk']);
 		if(!$perk->post_title)
 			return 'invalid-perk';
+
+		include(wpcf_template_include(dirname(dirname(__FILE__)).'/templates/wpcf-campaign-contributor-fields.php'));
+		if(is_array($wpcf_contributor_fields) && !empty($wpcf_contributor_fields)){
+			if($_POST['wpcf-contribute-anonymous']){
+				foreach($wpcf_contributor_fields as $id => $props){
+					if(!$_POST['wpcf-contribute-' . $id] && $props['required_anonymous'])
+						return 'missing-other-field';
+				}
+			}else{
+				foreach($wpcf_contributor_fields as $id => $props){
+					if(!$_POST['wpcf-contribute-' . $id] && $props['required'])
+						return 'missing-other-field';
+				}
+			}
+		}
+
 
 		$perk_custom = get_post_custom($perk->ID);
 		$perk_cost = $perk_custom['cost'][0];
@@ -59,9 +83,8 @@ class WPCrowdFund_FrontEnd_Process{
 		update_post_meta($backer, 'email', $email);
 		update_post_meta($backer, 'amount', $amount);
 
-		include(wpcf_template_include(dirname(dirname(__FILE__)).'/templates/wpcf-campaign-contributor-fields.php'));
 		if(is_array($wpcf_contributor_fields) && !empty($wpcf_contributor_fields)){
-			foreach($wpcf_contributor_fields as $field => $label){
+			foreach($wpcf_contributor_fields as $field => $arr){
 				if(isset($_POST['wpcf-contribute-' . $field]))
 					update_post_meta($backer, $field, $_POST['wpcf-contribute-' . $field]);
 			}
@@ -84,6 +107,15 @@ class WPCrowdFund_FrontEnd_Process{
 				break;
 			case 'price-too-low':
 				$message = __('We\'re sorry, but the perk you have choosen requires a larger contribution than what you have pledged. Please choose a different perk, or increase your contribution.', 'wp crowd fund');
+				break;
+			case 'name-email-missing':
+				$message = __('Please provide your name and email address, or choose to make an anonymous contribution', 'wp crowd fund');
+				break;
+			case 'invalid-email':
+				$message = __('Please provide a valid email address, or choose to make an anonymous contribution', 'wp crowd fund');
+				break;
+			case 'missing-other-field':
+				$message = __('You\'ve missed one or more required fields. Please review the contribution form.', 'wp crowd fund');
 				break;
 		}
 		return array('type'=>$type, 'message'=>$message);

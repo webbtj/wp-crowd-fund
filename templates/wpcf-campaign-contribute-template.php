@@ -3,6 +3,8 @@
 	<?php wpcf_contribute_amount_input(); ?>
 	<label for="<?php wpcf_contribute_perks_input(true,true); ?>"><?php echo __('Choose Your Perk', 'wp crowd fund'); ?></label>
 	<?php wpcf_contribute_perks_input(); ?>
+	<label for="<?php wpcf_contribute_anonymous_checkbox(true,true); ?>"><?php echo __('I would like to make my contribution anonymously', 'wp crowd fund'); ?></label>
+	<?php wpcf_contribute_anonymous_checkbox(); ?>
 	<label for="<?php wpcf_contribute_name_input(true,true); ?>"><?php echo __('Name', 'wp crowd fund'); ?></label>
 	<?php wpcf_contribute_name_input(); ?>
 	<label for="<?php wpcf_contribute_email_input(true,true); ?>"><?php echo __('Email', 'wp crowd fund'); ?></label>

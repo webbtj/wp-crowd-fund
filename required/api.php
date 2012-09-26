@@ -235,7 +235,12 @@ function wpcf_contribute_comments_input($echo=true, $id_only=false, $class=false
 	return __wpcf_contribute_textarea_input($id, $echo, $id_only, $class);
 }
 
-// and individual radio button for a perk selection
+function wpcf_contribute_anonymous_checkbox($echo=true, $id_only=false, $class=false){	
+	$id = 'wpcf-contribute-anonymous';
+	return __wpcf_contribute_checkbox_input($id, $echo, $id_only, $class);
+}
+
+// an individual radio button for a perk selection
 function wpcf_contribute_perk_radio($perk, $echo=true){
 	$radio = '<input data-min-contribution="' . $perk['cost'] . '" type="radio" name="wpcf-contribute-perk" value="' . $perk['id'] . '" />';
 	if(!$echo)
@@ -266,6 +271,7 @@ function wpcf_confirmation_button($button_text){
 	<?php
 }
 
+// the cancel button for the confirmation page (templates/wpcf-campaign-contribute-confirmation-template.php)
 function wpcf_cancel_contribution_button($button_text){
 	?>
 	<form method="post">

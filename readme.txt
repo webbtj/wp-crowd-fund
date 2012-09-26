@@ -6,15 +6,30 @@ Tested up to: 3.4.2
 Stable tag: trunk
 
 == TODO: ==
-- Admin JS -- check
-- Admin CSS
-- Front End JS -- check
-- Front End CSS
-- PayPal Integration
-- Extra Backer Fields (configurable) -- check
-- API Comments -- check
-- Cron to delete old holds -- think it's done, cron registers correctly, sql query works, just need to confirm cron actually runs
+= For Launch =
+- 		>>Admin JS -- check
+- 		>>Front End JS -- check
+- 		>>Anonymous Donations -- check
+- Remove/Hide Fixed Funding Option (for now)
+- PayPal Integration (Flexible Funding only using Web Payments Pro or Express or something)
+- 		>>Extra Backer Fields (configurable) -- check
+- 		>>API Comments -- check
+- 		>>Cron to delete old holds -- think it's done, cron registers correctly, sql query works, just need to confirm cron 		actually runs -- check
+
+= CAN Wait Until Shortly After Beta Launch =
 - Generate report of sold perks/backer info (can wait until after launch)
+- Admin CSS
+
+= Required For Public Launch =
+- Front End CSS
+- Settings Page (if applicable based on existing functionality)
+	- How long are holds?
+
+= Roadmap =
+- Adaptive Payments Integration (Pre-auth)
+- Flex-funding options: Pre-Auth (Adaptive) or Instant Billing (Payments Pro)
+- "Blind" Donation - for fixed funding campaigns, campaigner gets these donations regarless of goal
+- Chained Recipients (Adaptive) - specify a paypal account for the campaigner where most of the money goes (with a cut going to an admin account[optional])
 
 == Description ==
 
@@ -51,6 +66,12 @@ Administer Global Campaign Limitations:
 1. The funding column.
 
 == Changelog ==
+
+= 0.0.2 =
+Update some requirements/todo and roadmap stuff
+Added Anonymous field
+Changes to extra fields template structure to allow specifying if a field is required or required
+Add JS logic and frontend-processing logic to handle required additional fields
 
 = 0.0.1 =
 Fixed some stub/missing api/template functions
