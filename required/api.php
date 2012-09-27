@@ -73,10 +73,12 @@ function wpcf_contributed($echo=true){
 function wpcf_days_left($echo=true){
 	global $post;
 	$date = get_post_meta($post->ID, 'settings_date', true);
-	$date = new DateTime($date);
-	$now = new DateTime('now');
-	$days_left = $now->diff($date);
-	$days_left = $days_left->format('%a');
+	$date = strtotime($date);
+	$now = strtotime('now');
+	$seconds_left = $date - $now;
+	$minutes_left = $seconds_left / 60;
+	$hours_left = $minutes_left / 60;
+	$days_left = ceil($hours_left / 24);
 	if($echo)
 		echo $days_left;
 	else
@@ -132,7 +134,9 @@ function wpcf_perks($format=true){
 	}
 	if(!$format)
 		return $perks;
+	div(array('class' => 'wpcf-campaign-perks-template'));
 	include(wpcf_template_include(dirname(dirname(__FILE__)).'/templates/wpcf-campaign-perks-template.php'));
+	div('/');
 }
 
 /**
@@ -193,7 +197,9 @@ function wpcf_perk_button_required_id($perk){
 function wpcf_contribute_form(){
 	global $post;
 	$perks = wpcf_perks(false);
+	div(array('class' => 'wpcf-campaign-contribute-template'));
 	include(wpcf_template_include(dirname(dirname(__FILE__)).'/templates/wpcf-campaign-contribute-template.php'));
+	div('/');
 }
 
 // the input to allow a user to choose their perk
@@ -207,7 +213,9 @@ function wpcf_contribute_perks_input($echo=true, $id_only=false){
 	}else{
 		global $post;
 		$perks = wpcf_perks(false);
+		div(array('class' => 'wpcf-campaign-contribute-perks-template'));
 		include(wpcf_template_include(dirname(dirname(__FILE__)).'/templates/wpcf-campaign-contribute-perks-template.php'));
+		div('/');
 	}
 }
 

@@ -10,15 +10,18 @@ Stable tag: trunk
 - 		>>Admin JS -- check
 - 		>>Front End JS -- check
 - 		>>Anonymous Donations -- check
-- Remove/Hide Fixed Funding Option (for now)
-- PayPal Integration (Flexible Funding only using Web Payments Pro or Express or something)
+- 		>>PayPal Integration (Flexible Funding only using Express Checkout) -- check
 - 		>>Extra Backer Fields (configurable) -- check
 - 		>>API Comments -- check
 - 		>>Cron to delete old holds -- think it's done, cron registers correctly, sql query works, just need to confirm cron 		actually runs -- check
+- 		>>Fix Issue wth DateTime object -- check
 
 = CAN Wait Until Shortly After Beta Launch =
 - Generate report of sold perks/backer info (can wait until after launch)
 - Admin CSS
+- Remove/Hide Fixed Funding Option (for now)
+- Interface to provide API Credentials
+- Interface to provide titles/descriptions for a "product"
 
 = Required For Public Launch =
 - Front End CSS
@@ -66,6 +69,12 @@ Administer Global Campaign Limitations:
 1. The funding column.
 
 == Changelog ==
+
+= 0.0.3 =
+PayPal Express Checkout Integration (API Creds hard coded for now)
+Wrap rendered templates in classed divs
+Output buffer to catch content rendered by plugin and put it into the content (instead of echoing in place)
+Fix DateTime issue, some configutations may not have the DateTime module, just do time stamp math for now
 
 = 0.0.2 =
 Update some requirements/todo and roadmap stuff

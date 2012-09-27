@@ -1,13 +1,12 @@
 <?php
 
+add_action('wp', array('WPCrowdFund_FrontEnd_Process', 'process_contribution'));
+
 class WPCrowdFund_FrontEnd_Process{
 
 	public static function user_contribution(){
 		if(empty($_POST))
 			return false;
-
-		if(isset($_POST['confirm-contribution']))
-			return self::process_contribution();
 
 		if(isset($_POST['cancel-contribution']))
 			self::cancel_contribution();
@@ -17,8 +16,6 @@ class WPCrowdFund_FrontEnd_Process{
 
 		$required_fields = array(	'wpcf-contribute-amount',
 									'wpcf-contribute-perk',
-									//'wpcf-contribute-name',
-									//'wpcf-contribute-email',
 									'wpcf-contribute-comments');
 		foreach($required_fields as $required_field){
 			if(!isset($_POST[$required_field]))
@@ -54,7 +51,6 @@ class WPCrowdFund_FrontEnd_Process{
 				}
 			}
 		}
-
 
 		$perk_custom = get_post_custom($perk->ID);
 		$perk_cost = $perk_custom['cost'][0];
@@ -121,6 +117,33 @@ class WPCrowdFund_FrontEnd_Process{
 		return array('type'=>$type, 'message'=>$message);
 	}
 
+	public static function paypal_message(){
+		global $paypal_status;
+		$file = null;
+		switch($paypal_status){
+			case 'perk-not-in-campaign':
+				$file = 'wpcf-paypal-perk-not-in-campaign';
+				break;
+			case 'initializing-paypal':
+				//do not display anything
+				break;
+			case 'no-paypal-token':
+				$file = 'wpcf-paypal-no-paypal-token';
+				break;
+			case 'success':
+				$file = 'wpcf-campaign-thanks-template';
+				break;
+			case 'could-not-complete':
+				$file = 'wpcf-paypal-could-not-complete';
+				break;
+		}
+		if($file){
+			div(array('class' => $file));
+			include(wpcf_template_include(dirname(dirname(__FILE__)).'/templates/' . $file . '.php'));
+			div('/');			
+		}
+	}
+
 	public static function confirmation_page(){
 		$perk = wp_get_single_post($_POST['wpcf-contribute-perk']);
 		$perk_custom = get_post_custom($perk->ID);
@@ -137,30 +160,141 @@ class WPCrowdFund_FrontEnd_Process{
 		$email = $_POST['wpcf-contribute-email'];
 		$comments = $_POST['wpcf-contribute-comments'];
 		$amount = WPCrowdFund_AdminValidator::settings_target($_POST['wpcf-contribute-amount']);
+		div(array('class' => 'wpcf-campaign-contribute-confirmation-template'));
 		include(wpcf_template_include(dirname(dirname(__FILE__)).'/templates/wpcf-campaign-contribute-confirmation-template.php'));
+		div('/');	
 		return true;
 	}
 
 	public static function process_contribution(){
 		//send them to paypal
 		//this is just a stub for now
-		self::complete_transaction();
+		//PP_IPN::autopost_form();
+		//TO DO IN HERE:
+		/*
+		1. define RETURNURL and CANCELURL (should be get_permalink() with a param added);
+		2. Check if the cancel param was passed AND if referrer was from paypal,
+			2.1 if it is canceled set a global, use that global within the context of 'the_content' to render a cancelation template
+		3. Check if the return param was passed AND if the referrer was from paypal.
+			3.1 
+
+		*/
+		session_start();
+		if(isset($_POST['confirm-contribution']) && is_numeric($_SESSION['backer']) && $_SESSION['backer'] > 0){
+			global $post;
+			$base_url = get_permalink();
+			$return_url = _wpcf_url_params($base_url, array('action'=>'return'));
+			$cancel_url = _wpcf_url_params($base_url, array('action'=>'cancel'));
+
+			$backer = wp_get_single_post($_SESSION['backer']);
+			$backer_custom = get_post_custom($backer->ID);
+
+			$perk = wp_get_single_post($backer->post_parent);
+			$perk_custom = get_post_custom($perk->ID);
+
+			$campaign = $post;
+			$campaign_custom = get_post_custom($campaign->ID);
+
+			if($perk->post_parent != $campaign->ID){
+				global $paypal_status;
+				$paypal_status = 'perk-not-in-campaign';
+				return; //something went horribly wrong... ohhhh noooo (bruce)
+			}
+
+			$amount = $backer['amount'][0];
+			// GET A TOKEN
+			$comm = new PPCommunicate();
+			$response = $comm->request('SetExpressCheckout', array(
+				'PAYMENTREQUEST_0_PAYMENTACTION'=>'Sale',
+				'PAYMENTREQUEST_0_AMT'=>$backer_custom['amount'][0],
+				'PAYMENTREQUEST_0_ITEMAMT'=>$backer_custom['amount'][0],
+				'PAYMENTREQUEST_0_CURRENCYCODE'=>wpcf_checkout_currency($campaign) ,
+				'L_PAYMENTREQUEST_0_NAME0'=>wpcf_checkout_title($campaign, $perk, $backer, $backer_custom) ,
+				'L_PAYMENTREQUEST_0_NUMBER0'=>$backer->ID,
+				'L_PAYMENTREQUEST_0_DESC0'=>wpcf_checkout_description($campaign, $perk, $backer, $backer_custom) ,
+				'L_PAYMENTREQUEST_0_AMT0'=>$backer_custom['amount'][0],
+				'L_PAYMENTREQUEST_0_QTY0'=>'1',
+				'ALLOWNOTE'=>'0',
+				'NOSHIPPING'=>'1',
+				'RETURNURL'=> $return_url,
+				'CANCELURL'=> $cancel_url
+			));
+			//IF WE GET A TOKEN, GO TO PAYPAL WITH IT
+			if($response['TOKEN'] && ( strtolower($response['ACK'])=='success' || strtolower($response['ACK'])=='successwithwarning') ){
+				global $paypal_status;
+				$paypal_status = 'initializing-paypal';
+				$_SESSION['TOKEN'] = $response['TOKEN'];
+				header('Location: ' . wpcf_checkout_paypal_url($response['TOKEN']));
+				exit();
+			}else{
+				global $paypal_status;
+				$paypal_status = 'no-paypal-token';
+				//sumptin phishy with pp, display a generic error (and by display I mean globalize a variable to be used within 'the_content')
+			}
+		// we just got a token and payer id back from paypal, so try and process it
+		}elseif(isset($_GET['token']) && isset($_GET['PayerID']) && $_SESSION['TOKEN']==$_GET['token']){
+			global $post;
+
+			$backer = wp_get_single_post($_SESSION['backer']);
+			$backer_custom = get_post_custom($backer->ID);
+
+			$perk = wp_get_single_post($backer->post_parent);
+			$perk_custom = get_post_custom($perk->ID);
+
+			$campaign = $post;
+			$campaign_custom = get_post_custom($campaign->ID);
+
+			$comm = new PPCommunicate();
+			$response = $comm->request('DoExpressCheckoutPayment', array(
+				'TOKEN' => $_SESSION['TOKEN'],
+				'PAYERID' => $_GET['PayerID'],
+				'PAYMENTREQUEST_0_PAYMENTACTION'=>'Sale',
+				'PAYMENTREQUEST_0_AMT'=>$backer_custom['amount'][0],
+				'PAYMENTREQUEST_0_CURRENCYCODE'=>wpcf_checkout_currency($campaign) ,
+				'IPADDRESS' => $_SERVER['SERVER_NAME']
+			));
+
+			if(strtolower($response['ACK'])=='success' || strtolower($response['ACK'])=='successwithwarning'){
+				// we have confirmed payment! set a var to output a message
+				self::complete_transaction();
+				global $paypal_status;
+				$paypal_status = 'success';
+			}else{
+				//log info from response
+				//set var to output message (generic, your payment has not been processed deal, please contact blah blah blah)
+				self::log_pp_error($campaign, $response, $token);
+				self::cancel_contribution();
+				global $paypal_status;
+				$paypal_status = 'could-not-complete';
+			}
+		}
 		return true;
+	}
+
+	public static function log_pp_error($campaign, $response, $token){
+		$error = array('post_type' => 'wpcf-pp-error', 'post_title' => $token, 'post_status' => 'publish', 'post_parent' => $campaign->ID);
+		$error = wp_insert_post($error);
+		if($error && is_array($response) && !empty($response)){
+			foreach($response as $k => $v){
+				update_post_meta($error->ID, $k, $v);
+			}
+		}
 	}
 
 	public static function cancel_contribution(){
 		//get the backer
 		$backer = wp_get_single_post($_SESSION['backer']);
-		//delete backer meta
 		//get perk
 		$perk = wp_get_single_post($backer->post_parent);
 		//get perk meta
 		$perk_custom = get_post_custom($perk->ID);
 		//remove last hold
 		$hold = $perk_custom['hold'];
-		sort($hold);
-		$last = array_pop($hold);
-		delete_post_meta($perk->ID, 'hold', $last);
+		if(!empty($hold)){
+			sort($hold);
+			$last = array_pop($hold);
+			delete_post_meta($perk->ID, 'hold', $last);
+		}
 		//delete backer
 		wp_delete_post($_SESSION['backer'], true);
 		//remove backer form session
@@ -182,9 +316,11 @@ class WPCrowdFund_FrontEnd_Process{
 		update_post_meta($perk->ID, 'sold', $sold);
 
 		$hold = $perk_custom['hold'];
-		sort($hold);
-		$last = array_pop($hold);
-		delete_post_meta($perk->ID, 'hold', $last);
+		if(!empty($hold)){
+			sort($hold);
+			$last = array_pop($hold);
+			delete_post_meta($perk->ID, 'hold', $last);
+		}
 
 		$perk_custom = get_post_custom($perk->ID);
 
@@ -201,7 +337,5 @@ class WPCrowdFund_FrontEnd_Process{
 		$backer_description = $backer->post_content;
 		$backer_email = $backer_custom['email'][0];
 		$backer_amount = $backer_custom['amount'][0];
-
-		include(wpcf_template_include(dirname(dirname(__FILE__)).'/templates/wpcf-campaign-thanks-template.php'));
 	}
 }

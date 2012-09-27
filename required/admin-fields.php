@@ -79,7 +79,8 @@ if(!function_exists('div')){
 				'class' => ''
 			), $args);
 		extract($args);
-		echo "<div id=\"$id\" class=\"$class\">";;
+		$id = $id ? 'id="' . $id . '"' : '';
+		echo "<div $id class=\"$class\">";
 	}
 }
 

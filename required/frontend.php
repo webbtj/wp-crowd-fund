@@ -5,24 +5,34 @@ add_action('wp_enqueue_scripts', array('WPCrowdFund_FrontEnd', 'enqueue_scripts'
 class WPCrowdFund_FrontEnd{
 
 	function the_content($content){
-		global $post;
+		global $post, $paypal_status;
 		if($post->post_type == 'wpcf-campaign'){
-			$content = '';
-			$display_confirmation = false;
-			$contribution = WPCrowdFund_FrontEnd_Process::user_contribution();
-			if($contribution){
-				if($contribution===true){
-					$display_confirmation = true;
-				}elseif(is_numeric($contribution) && $contribution > 0){
-					//do confirmation
-					$display_confirmation = WPCrowdFund_FrontEnd_Process::confirmation_page();
-				}elseif(is_string($contribution)){
-					//do error message
-					$perk_error = WPCrowdFund_FrontEnd_Process::error_message($contribution);
+			//$content = '';
+			ob_start();
+			if($paypal_status){
+				WPCrowdFund_FrontEnd_Process::paypal_message();
+			}else{
+				$display_confirmation = false;
+				$contribution = WPCrowdFund_FrontEnd_Process::user_contribution();
+				if($contribution){
+					if($contribution===true){
+						$display_confirmation = true;
+					}elseif(is_numeric($contribution) && $contribution > 0){
+						//do confirmation
+						$display_confirmation = WPCrowdFund_FrontEnd_Process::confirmation_page();
+					}elseif(is_string($contribution)){
+						//do error message
+						$perk_error = WPCrowdFund_FrontEnd_Process::error_message($contribution);
+					}
+				}
+				if(!$display_confirmation){
+					div(array('class' => 'wpcf-campaign-single-template'));
+					include(wpcf_template_include(dirname(dirname(__FILE__)).'/templates/wpcf-campaign-single-template.php'));
+					div('/');	
 				}
 			}
-			if(!$display_confirmation)
-				include(wpcf_template_include(dirname(dirname(__FILE__)).'/templates/wpcf-campaign-single-template.php'));
+			$content .= ob_get_contents();
+			ob_end_clean();
 		}
 		return $content;
 	}

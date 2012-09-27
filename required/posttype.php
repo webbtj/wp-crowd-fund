@@ -48,6 +48,12 @@ class WPCrowdFund_Admin{
 			'description' => __('A person who has contributed to a crowd-funding campaign.', 'wp crowd fund'),
 			'public' => false,
 		));
+
+		register_post_type('wpcf-pp-error',array(
+			'label' => __('Error', 'wp crowd fund'),
+			'description' => __('An error log record of a PayPal processing error.', 'wp crowd fund'),
+			'public' => false,
+		));
 	}
 
 	public static function add_meta_boxes(){

@@ -20,7 +20,7 @@ require_once('required/frontend.php');
 require_once('required/frontend-process.php');
 session_start();
 //paypal integration
-//require_once('required/paypal/...');
+require_once('required/paypal/core.php');
 
 function pre($a){
 	echo '<pre>';

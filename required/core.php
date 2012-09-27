@@ -93,3 +93,49 @@ function _wpcf_contributor_field($type, $name, $echo=true, $id_only=false){
 			return $html;
 	}
 }
+
+function _wpcf_url_params($url='', $params=array()){
+	if(is_array($params) && !empty($params)){
+		$url .= strpos($url, '?') ? '&' : '?';
+		$first = true;
+		foreach($params as $k => $v){
+			$url .= $first ? '' : '&';
+			$url .= urlencode($k) . '=' . urlencode($v);
+			$first = false;
+		}
+	}
+	return $url;
+}
+
+// returns the title of the "item" being passed to paypal
+function wpcf_checkout_title($campaign, $perk, $backer, $backer_custom){
+	//stub for now
+	$string = 'Pursu.it Contribution for [campaign_title]';
+	$search = array('[campaign_title]', '[perk_title]', '[backer_title]', '[backer_amount]');
+	$replace = array($campaign->post_title, $perk->post_title, $backer->post_title, $backer_custom['amount'][0]);
+	$string = str_replace($search, $replace, $string);
+	return $string;
+}
+
+// returns the description of the "item" being passed to paypal
+function wpcf_checkout_description($campaign, $perk, $backer, $backer_custom){
+	//stub for now
+	$string = 'Supporting [campaign_title] on Pursu.it with a contribution of [backer_amount], giveback: [perk_title]';
+	$search = array('[campaign_title]', '[perk_title]', '[backer_title]', '[backer_amount]');
+	$replace = array($campaign->post_title, $perk->post_title, $backer->post_title, $backer_custom['amount'][0]);
+	$string = str_replace($search, $replace, $string);
+	return $string;
+}
+
+// returns the curreny code of the "item" being passed to paypal
+function wpcf_checkout_currency($campaign){
+	//stub for now
+	return 'CAD';
+}
+
+// returns paypal url
+function wpcf_checkout_paypal_url($token){
+	//stub for now
+	$url = 'https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=' . urlencode($token);
+	return $url;
+}
