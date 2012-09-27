@@ -127,6 +127,7 @@ function wpcf_perks($format=true){
 			}
 			$perks[] = $perk;
 		}
+		usort($perks, "costsort");		
 		if(empty($perks))
 			return false;
 	}
@@ -166,6 +167,13 @@ function wpcf_perk_remaining($perk){
 // boolean - is the perk sold out?
 function wpcf_perk_soldout($perk){
 	return $perk['sold_out'];
+}
+
+// order perks by cost
+function costsort($a, $b){
+  if ($a['cost'] == $b['cost'])
+    return 0;
+  return ($a > $b) ? -1 : 1;
 }
 
 /** Contribute Buttons
