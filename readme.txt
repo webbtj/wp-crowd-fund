@@ -70,6 +70,12 @@ Administer Global Campaign Limitations:
 
 == Changelog ==
 
+= 0.0.5 =
+Numbers of backers was always returning all backers [wpcf_backers] *fixed*
+Contribution dollar values were always returning all contributions [wpcf_contributed] *fixed*
+Contribution percentage was not accounting for the commas, so a goal of $12,000 was treated as 12,
+	so the percentages were extremely off.
+
 = 0.0.4 =
 Added Perk and Backer variables to the payment process response pages. Vars are:
 - $backer

@@ -19,11 +19,19 @@ function wpcf_backers($echo=true){
 		foreach($perks as $perk){
 			$perk_ids[] = $perk['id'];
 		}
-		$backers = count(get_children(array(
-			'post_parent' => $perk_ids,
-			'post_type' => 'wpcf-backer',
-			'post_status' => 'publish',
-		)));
+		global $post;
+		$perk_ids[] = $post->ID;
+		$backers = array();
+		if(!empty($perk_ids)){
+			foreach($perk_ids as $pid){
+				$backers += get_children(array(
+					'post_parent' => $pid,
+					'post_type' => 'wpcf-backer',
+					'post_status' => 'publish',
+				));
+			}
+		}
+		$backers = count($backers);
 	}
 	if($echo)
 		echo $backers;
@@ -46,16 +54,23 @@ function wpcf_contributed($echo=true, $percent=false){
 	$contributed = 0;
 
 	$perks = wpcf_perks(false);
+	global $post;
 	if(is_array($perks)){
 		$perk_ids = array();
 		foreach($perks as $perk){
 			$perk_ids[] = $perk['id'];
 		}
-		$backers = get_children(array(
-			'post_parent' => $perk_ids,
-			'post_type' => 'wpcf-backer',
-			'post_status' => 'publish',
-		));
+		$perk_ids[] = $post->ID;
+		$backers = array();
+		if(!empty($perk_ids)){
+			foreach($perk_ids as $pid){
+				$backers += get_children(array(
+					'post_parent' => $pid,
+					'post_type' => 'wpcf-backer',
+					'post_status' => 'publish',
+				));
+			}
+		}
 		if(!empty($backers)){
 			foreach($backers as $backer){
 				$backer_contributed = get_post_meta($backer->ID, 'amount', true);
@@ -64,12 +79,12 @@ function wpcf_contributed($echo=true, $percent=false){
 		}
 	}
 	if($percent){
-		$goal = (float)wpcf_goal(false);
+		$goal = (float) str_replace(',', '', wpcf_goal(false));
 		if(!$contributed){
 		}elseif(!$goal && $contributed){
 			$contributed = 100;
 		}else{
-			$contributed = ceil(($contributed / wpcf_goal(false)) * 100);
+			$contributed = ceil(($contributed / $goal) * 100);
 			if($contributed>100)
 				$contributed=100;
 		}
@@ -111,7 +126,8 @@ function wpcf_end_date($echo=true){
 // the perks for the campaign
 function wpcf_perks($format=true){
 	global $post, $perks;
-	if(!is_array($perks) || empty($perks)){
+	$perks = array();
+	//if(!is_array($perks) || empty($perks)){
 		$children = get_children(array(
 			'post_parent' => $post->ID,
 			'post_type' => 'wpcf-perk',
@@ -144,7 +160,7 @@ function wpcf_perks($format=true){
 		usort($perks, "costsort");		
 		if(empty($perks))
 			return false;
-	}
+	//}
 	if(!$format)
 		return $perks;
 	div(array('class' => 'wpcf-campaign-perks-template'));
