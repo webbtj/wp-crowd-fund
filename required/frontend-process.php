@@ -11,6 +11,9 @@ class WPCrowdFund_FrontEnd_Process{
 		if(isset($_POST['cancel-contribution']))
 			self::cancel_contribution();
 
+		if(isset($_POST['wpcf-edit-contribution']))
+			return false;
+
 		global $post;
 		$post_id = $post->ID;
 
@@ -30,7 +33,7 @@ class WPCrowdFund_FrontEnd_Process{
 			return 'invalid-email';
 		}
 
-		if(!is_numeric($_POST['wpcf-contribute-perk']))
+		if(!is_numeric($_POST['wpcf-contribute-perk']) && $_POST['wpcf-contribute-perk'] != wpcf_no_reward_value())
 			return 'invalid-perk';
 
 		$perk = wp_get_single_post($_POST['wpcf-contribute-perk']);
@@ -118,6 +121,35 @@ class WPCrowdFund_FrontEnd_Process{
 	}
 
 	public static function paypal_message(){
+		global $post;
+		//perk and backer variables
+		$backer = $backer_custom = $backer_title = false;
+		$backer_description = $backer_email = $backer_amount = false;
+		$perk = $perk_custom = $perk_cost = $perk_limit = false;
+		$perk_sold = $perk_hold = $perk_title = $perk_description = false;
+		if(isset($_SESSION['backer']) && is_numeric($_SESSION['backer'])){
+			$backer = wp_get_single_post($_SESSION['backer']);
+		}
+		if($backer){
+			$perk = wp_get_single_post($backer->post_parent);
+			if($perk->ID == $post->ID)
+				$perk = false;
+			$backer_custom = get_post_custom($backer->ID);
+			$backer_title = $backer->post_title;
+			$backer_description = $backer->post_content;
+			$backer_email = $backer_custom['email'][0];
+			$backer_amount = $backer_custom['amount'][0];
+		}
+		if($perk){
+			$perk_custom = get_post_custom($perk->ID);
+			$perk_cost = $perk_custom['cost'][0];
+			$perk_limit = $perk_custom['limit'][0];
+			$perk_sold = $perk_custom['sold'][0];
+			$perk_hold = count($perk_custom['hold']);
+			$perk_sold += $perk_hold;
+			$perk_title = $perk->post_title;
+			$perk_description = $perk->post_content;
+		}
 		global $paypal_status;
 		$file = null;
 		switch($paypal_status){
@@ -145,17 +177,21 @@ class WPCrowdFund_FrontEnd_Process{
 	}
 
 	public static function confirmation_page(){
-		$perk = wp_get_single_post($_POST['wpcf-contribute-perk']);
-		$perk_custom = get_post_custom($perk->ID);
-		$perk_cost = $perk_custom['cost'][0];
-		$perk_limit = $perk_custom['limit'][0];
-		$perk_sold = $perk_custom['sold'][0];
-		$perk_hold = count($perk_custom['hold']);
-		$perk_sold += $perk_hold;
+		if(is_numeric($_POST['wpcf-contribute-perk'])){
+			$perk = wp_get_single_post($_POST['wpcf-contribute-perk']);
+			$perk_custom = get_post_custom($perk->ID);
+			$perk_cost = $perk_custom['cost'][0];
+			$perk_limit = $perk_custom['limit'][0];
+			$perk_sold = $perk_custom['sold'][0];
+			$perk_hold = count($perk_custom['hold']);
+			$perk_sold += $perk_hold;
 
-		add_post_meta($perk->ID, 'hold', strtotime('now'));
-		$perk_title = $perk->post_title;
-		$perk_description = $perk->post_content;
+			add_post_meta($perk->ID, 'hold', strtotime('now'));
+			$perk_title = $perk->post_title;
+			$perk_description = $perk->post_content;
+		}else{
+			$no_perk = true;
+		}
 		$name = $_POST['wpcf-contribute-name'] ? $_POST['wpcf-contribute-name'] : __('Anonymous', 'wp crowd fund');
 		$email = $_POST['wpcf-contribute-email'];
 		$comments = $_POST['wpcf-contribute-comments'];
@@ -195,13 +231,15 @@ class WPCrowdFund_FrontEnd_Process{
 			$campaign = $post;
 			$campaign_custom = get_post_custom($campaign->ID);
 
-			if($perk->post_parent != $campaign->ID){
+			//why perk->ID != campaign->ID? -- because if they choose no reward the backer's parent
+			//becomes the campaign instad of the perk
+			if($perk->post_parent != $campaign->ID && $perk->ID != $campaign->ID){
 				global $paypal_status;
 				$paypal_status = 'perk-not-in-campaign';
 				return; //something went horribly wrong... ohhhh noooo (bruce)
 			}
 
-			$amount = $backer['amount'][0];
+			$amount = $backer_custom['amount'][0];
 			// GET A TOKEN
 			$comm = new PPCommunicate();
 			$response = $comm->request('SetExpressCheckout', array(

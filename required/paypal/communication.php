@@ -7,9 +7,12 @@ class PPCommunicate{
 	function populate_credentials(){
 		$this->API_ENDPOINT		= 'https://api-3t.sandbox.paypal.com/nvp';
 		$this->API_VERSION		= '72';
-		$this->API_USERNAME		= 'sell_1266966509_biz_api1.hotmail.com';
-		$this->API_PASSWORD		= '1266966516';
-		$this->API_SIGNATURE	= 'AuV-Biu2JVNtNCtTd3N0TOtCjpkWA5CpczZUhVesmeEvHsY5v1L-DcH-';
+		//$this->API_USERNAME		= 'sell_1266966509_biz_api1.hotmail.com';
+		$this->API_USERNAME		= 'sandbo_1348837769_biz_api1.norex.ca';
+		//$this->API_PASSWORD		= '1266966516';
+		$this->API_PASSWORD		= '1348837824';
+		//$this->API_SIGNATURE	= 'AuV-Biu2JVNtNCtTd3N0TOtCjpkWA5CpczZUhVesmeEvHsY5v1L-DcH-';
+		$this->API_SIGNATURE	= 'AFcWxV21C7fd0v3bYYYRCpSSRl31AnMpi59uaQ7CraXVHqZeFRtcnqqc';
 	}
 
 	function __construct(){

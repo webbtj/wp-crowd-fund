@@ -33,6 +33,7 @@ class WPCrowdFund_Admin{
 				'excerpt',
 				'comments',
 			),
+			'rewrite' => array('slug' => 'campaign')
 			//'menu_icon' =>  plugins_url('admin/images/project.png', __FILE__),
 		));
 		register_taxonomy_for_object_type('tag', 'wpcf-campaign');

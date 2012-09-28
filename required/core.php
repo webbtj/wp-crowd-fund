@@ -16,8 +16,9 @@ function __wpcf_contribute_text_input($id, $echo=true, $id_only=false, $class=fa
 		else
 			return $id;
 	}else{
+		$value = isset($_POST[$id]) ? $_POST[$id] : '';
 		$class = $class ? ' class="' . $class . '" ' : '';
-		$output = '<input type="text" name="' . $id . '" id="' . $id . '" ' . $class . ' />';
+		$output = '<input value="' . $value . '" type="text" name="' . $id . '" id="' . $id . '" ' . $class . ' />';
 		if($echo)
 			echo $output;
 		else
@@ -32,8 +33,9 @@ function __wpcf_contribute_textarea_input($id, $echo=true, $id_only=false, $clas
 		else
 			return $id;
 	}else{
+		$value = isset($_POST[$id]) ? $_POST[$id] : '';
 		$class = $class ? ' class="' . $class . '" ' : '';
-		$output = '<textarea type="text" name="' . $id . '" id="' . $id . '" ' . $class . '></textarea>';
+		$output = '<textarea type="text" name="' . $id . '" id="' . $id . '" ' . $class . '>' . $value . '</textarea>';
 		if($echo)
 			echo $output;
 		else
@@ -75,13 +77,14 @@ function _wpcf_contributor_field($type, $name, $echo=true, $id_only=false){
 			return $id;
 		return;
 	}elseif($id){
+		$value = $_POST[$id] ? $_POST[$id] : '';
 		$html = '';
 		switch($type){
 			case 'text':
-				$html = '<input ' . $class . ' type="text" name="' . $id . '" id="' . $id . '" />';
+				$html = '<input value="' . $value . '" ' . $class . ' type="text" name="' . $id . '" id="' . $id . '" />';
 				break;
 			case 'textarea':
-				$html = '<textarea ' . $class . ' name="' . $id . '" id="' . $id . '"></textarea>';
+				$html = '<textarea ' . $class . ' name="' . $id . '" id="' . $id . '">' . $value . '</textarea>';
 				break;
 			case 'label':
 				$html = '<label for="'.$id.'">' . $wpcf_contributor_fields[$name]['label'] . '</label>';
@@ -110,6 +113,11 @@ function _wpcf_url_params($url='', $params=array()){
 // returns the title of the "item" being passed to paypal
 function wpcf_checkout_title($campaign, $perk, $backer, $backer_custom){
 	//stub for now
+	if($perk->ID == $campaign->ID){
+		//perk and campaign are the same because if a backer has no-reward
+		//the campaign is the parent and it gets passed around as the perk as well
+		$perk->post_title = __('No Reward', 'wp crowd fund');
+	}
 	$string = 'Pursu.it Contribution for [campaign_title]';
 	$search = array('[campaign_title]', '[perk_title]', '[backer_title]', '[backer_amount]');
 	$replace = array($campaign->post_title, $perk->post_title, $backer->post_title, $backer_custom['amount'][0]);

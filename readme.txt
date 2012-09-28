@@ -70,6 +70,25 @@ Administer Global Campaign Limitations:
 
 == Changelog ==
 
+= 0.0.4 =
+Added Perk and Backer variables to the payment process response pages. Vars are:
+- $backer
+- $backer_custom
+- $backer_title
+- $backer_description
+- $backer_email
+- $backer_amount
+- $perk
+- $perk_custom
+- $perk_cost
+- $perk_limit
+- $perk_sold
+- $perk_hold
+- $perk_title
+- $perk_description
+Any variables without a value will be a boolean false. There may have been other minor changes since
+0.0.3 regarding payment processing and some template tags.
+
 = 0.0.3 =
 PayPal Express Checkout Integration (API Creds hard coded for now)
 Wrap rendered templates in classed divs
@@ -94,5 +113,3 @@ Moved some stuff that wasn't really part of the templating API into a "core.php"
 
 = 0.0.0 =
 Initial github push
-
-First public release.

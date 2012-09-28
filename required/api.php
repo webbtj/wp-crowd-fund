@@ -42,7 +42,7 @@ function wpcf_goal($echo=true){
 }
 
 // the amount contributed to the campaign (money)
-function wpcf_contributed($echo=true){
+function wpcf_contributed($echo=true, $percent=false){
 	$contributed = 0;
 
 	$perks = wpcf_perks(false);
@@ -61,6 +61,17 @@ function wpcf_contributed($echo=true){
 				$backer_contributed = get_post_meta($backer->ID, 'amount', true);
 				$contributed += $backer_contributed;
 			}
+		}
+	}
+	if($percent){
+		$goal = (float)wpcf_goal(false);
+		if(!$contributed){
+		}elseif(!$goal && $contributed){
+			$contributed = 100;
+		}else{
+			$contributed = ceil(($contributed / wpcf_goal(false)) * 100);
+			if($contributed>100)
+				$contributed=100;
 		}
 	}
 	if($echo)
@@ -104,6 +115,7 @@ function wpcf_perks($format=true){
 		$children = get_children(array(
 			'post_parent' => $post->ID,
 			'post_type' => 'wpcf-perk',
+			'post_status' => 'publish',
 			'order' => 'ASC',
 			'orderby' => 'meta_value_num',
 			'meta_key' => 'order',
@@ -160,6 +172,11 @@ function wpcf_perk_description($perk){
 	echo $perk['description'];
 }
 
+// the number of perks sold
+function wpcf_perk_sold($perk){
+	echo $perk['sold'];
+}
+
 // the number remaing (or "unlimited")
 function wpcf_perk_remaining($perk){
 	if($perk['limit']==0)
@@ -177,7 +194,7 @@ function wpcf_perk_soldout($perk){
 function costsort($a, $b){
   if ($a['cost'] == $b['cost'])
     return 0;
-  return ($a > $b) ? -1 : 1;
+  return ($a < $b) ? -1 : 1;
 }
 
 /** Contribute Buttons
@@ -258,10 +275,35 @@ function wpcf_contribute_anonymous_checkbox($echo=true, $id_only=false, $class=f
 
 // an individual radio button for a perk selection
 function wpcf_contribute_perk_radio($perk, $echo=true){
-	$radio = '<input data-min-contribution="' . $perk['cost'] . '" type="radio" name="wpcf-contribute-perk" value="' . $perk['id'] . '" />';
+	$radio = '<input ' . checked($_POST['wpcf-contribute-perk'], $perk['id'], false) . ' data-min-contribution="' . str_replace(',', '', $perk['cost']) . '" type="radio" name="wpcf-contribute-perk" value="' . $perk['id'] . '" />';
 	if(!$echo)
 		return $radio;
 	echo $radio;
+}
+
+// value used to identify a no-reward contribution
+function wpcf_no_reward_value(){
+	return 'no';
+}
+
+// a button to edit a contribution from the confirmation screen
+function wpcf_edit_contribution_button($text){
+	echo '<form method="post">';
+	if(!empty($_POST)){
+		foreach($_POST as $k => $v){
+			if(is_string($v)){
+				echo '<input type="hidden" name="' . $k . '" value="' . $v . '" />';
+			}
+		}
+	}
+	echo '<input type="hidden" name="wpcf-edit-contribution" value="wpcf-edit-contribution" />';
+	echo '<input type="submit" value="' . $text . '" />';
+	echo '</form>';
+}
+
+// returns a boolean of whether or not the current contribution form is an edit or not
+function wpcf_is_edit_contribution(){
+	return isset($_POST['wpcf-edit-contribution']);
 }
 
 // genereic fields used to capture additional informaion from a backer (like address)
@@ -282,7 +324,7 @@ function wpcf_contributor_label($name, $echo=true, $id_only=false){
 function wpcf_confirmation_button($button_text){
 	?>
 	<form method="post">
-		<input type="submit" name="confirm-contribution" value="<?php echo $button_text; ?>" />
+		<input type="submit" name="confirm-contribution" class="confirm-contribution" value="<?php echo $button_text; ?>" />
 	</form>
 	<?php
 }
@@ -291,7 +333,7 @@ function wpcf_confirmation_button($button_text){
 function wpcf_cancel_contribution_button($button_text){
 	?>
 	<form method="post">
-		<input type="submit" name="cancel-contribution" value="<?php echo $button_text; ?>" />
+		<input type="submit" name="cancel-contribution" class="cancel-contribution" value="<?php echo $button_text; ?>" />
 	</form>
 	<?php
 }

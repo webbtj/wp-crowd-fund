@@ -22,10 +22,12 @@ session_start();
 //paypal integration
 require_once('required/paypal/core.php');
 
-function pre($a){
-	echo '<pre>';
-	print_r($a);
-	echo '</pre>';
+if(!function_exists('pre')){
+	function pre($a){
+		echo '<pre>';
+		print_r($a);
+		echo '</pre>';
+	}
 }
 
 register_activation_hook(__FILE__, array('WPCrowdFund_Installer', 'activate'));
