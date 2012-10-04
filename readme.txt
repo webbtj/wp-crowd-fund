@@ -28,12 +28,6 @@ Stable tag: trunk
 - Settings Page (if applicable based on existing functionality)
 	- How long are holds?
 
-= Roadmap =
-- Adaptive Payments Integration (Pre-auth)
-- Flex-funding options: Pre-Auth (Adaptive) or Instant Billing (Payments Pro)
-- "Blind" Donation - for fixed funding campaigns, campaigner gets these donations regarless of goal
-- Chained Recipients (Adaptive) - specify a paypal account for the campaigner where most of the money goes (with a cut going to an admin account[optional])
-
 == Description ==
 
 This plugin provides crowd funding functionality to your WordPress website. Create unlimited campaigns with unlimited "perks" or "give backs". Create multiple perks of the same value for the same campaign. Contributors can choose any available perk with a value equal to, or less than their donation. Choose a fixed or flexible funding campaigns (or some of each). Payments are collected one a campaign is complete.
