@@ -25,7 +25,6 @@
 - Backer Account Creation
 - Front End Account Creation (with optional approval)
 
-
 ## Client Specific Development ##
 
 ## Client Specific Design ##
